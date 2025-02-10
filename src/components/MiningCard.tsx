@@ -43,13 +43,13 @@ export const MiningCard = () => {
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Available Balance:</span>
-                <span className="text-lg">125.45 COINS</span>
+                <span className="text-lg status-green">125.45 COINS</span>
               </div>
             </div>
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Pending Rewards:</span>
-                <span className="text-lg">12.33 COINS</span>
+                <span className="text-lg status-yellow">12.33 COINS</span>
               </div>
             </div>
           </div>
@@ -67,7 +67,7 @@ export const MiningCard = () => {
               <div key={rank} className="ascii-box">
                 <div className="flex justify-between items-center">
                   <span>#{rank} Miner_{rank}232</span>
-                  <span className="text-lg">{1234 - (rank * 100)} H/s</span>
+                  <span className={`text-lg ${rank === 1 ? 'status-yellow' : ''}`}>{1234 - (rank * 100)} H/s</span>
                 </div>
               </div>
             ))}
@@ -85,13 +85,13 @@ export const MiningCard = () => {
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Mine for 1 hour</span>
-                <span className="text-sm">45/60 min</span>
+                <span className="text-sm status-orange">45/60 min</span>
               </div>
             </div>
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Find 10 shares</span>
-                <span className="text-sm">{shares}/10</span>
+                <span className="text-sm status-green">{shares}/10</span>
               </div>
             </div>
           </div>
@@ -110,7 +110,7 @@ export const MiningCard = () => {
               <div className="ascii-box">
                 <div className="flex flex-col items-center">
                   <Hash className="w-4 h-4 mb-2 opacity-70" />
-                  <span className="text-lg">{formatHashRate(hashRate)}</span>
+                  <span className={`text-lg ${isRunning ? 'status-green' : ''}`}>{formatHashRate(hashRate)}</span>
                   <span className="text-xs opacity-70">HASH/SEC</span>
                 </div>
               </div>
@@ -118,7 +118,7 @@ export const MiningCard = () => {
               <div className="ascii-box">
                 <div className="flex flex-col items-center">
                   <Share2 className="w-4 h-4 mb-2 opacity-70" />
-                  <span className={`text-lg ${animate ? 'animate-bounce' : ''}`}>
+                  <span className={`text-lg ${animate ? 'animate-bounce status-yellow' : ''}`}>
                     {shares}
                   </span>
                   <span className="text-xs opacity-70">SHARES</span>
@@ -128,7 +128,7 @@ export const MiningCard = () => {
               <div className="ascii-box">
                 <div className="flex flex-col items-center">
                   <Signal className="w-4 h-4 mb-2 opacity-70" />
-                  <span className="text-lg">172.50</span>
+                  <span className="text-lg status-orange">172.50</span>
                   <span className="text-xs opacity-70">DIFFICULTY</span>
                 </div>
               </div>
@@ -152,6 +152,11 @@ export const MiningCard = () => {
                 <span>RATE: 0.1 kW/s</span>
                 <span>ETA: {formatTime(timeRemaining)}</span>
               </div>
+              {isRunning && (
+                <div className="text-center text-sm status-green animate-mining">
+                  .. :. .: ::
+                </div>
+              )}
             </div>
 
             <div className="ascii-box">
@@ -160,7 +165,7 @@ export const MiningCard = () => {
                   <Database className="w-4 h-4 opacity-70" />
                   <span className="text-sm opacity-70">REWARD POOL</span>
                 </div>
-                <span className="text-lg">240.00</span>
+                <span className="text-lg status-yellow">240.00</span>
               </div>
             </div>
 

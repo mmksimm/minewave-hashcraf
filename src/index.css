@@ -45,10 +45,30 @@
   .ascii-box {
     @apply px-4 py-2 terminal-border;
   }
+
+  .status-yellow {
+    @apply text-[#FEF7CD];
+  }
+
+  .status-green {
+    @apply text-[#F2FCE2];
+  }
+
+  .status-orange {
+    @apply text-[#FEC6A1];
+  }
+
+  .status-red {
+    @apply text-[#ea384c];
+  }
 }
 
 .animate-blink {
   animation: blink 1s step-end infinite;
+}
+
+.animate-mining {
+  animation: mining 2s linear infinite;
 }
 
 @keyframes blink {
@@ -56,3 +76,12 @@
     opacity: 0;
   }
 }
+
+@keyframes mining {
+  0% { content: ".."; }
+  25% { content: ":."; }
+  50% { content: ".:"; }
+  75% { content: "::"; }
+  100% { content: ".."; }
+}
+
