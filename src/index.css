@@ -20,14 +20,14 @@
     @apply border-border;
   }
   body {
-    @apply bg-black text-green-500 antialiased font-mono;
+    @apply bg-black text-gray-300 antialiased font-mono;
     font-family: 'IBM Plex Mono', monospace;
   }
 }
 
 @layer utilities {
   .terminal-border {
-    @apply border border-green-500/30;
+    @apply border border-gray-500/30;
   }
   
   .terminal-card {
@@ -35,7 +35,7 @@
   }
   
   .terminal-header {
-    @apply border-b border-green-500/30 px-4 py-2 flex items-center justify-between;
+    @apply border-b border-gray-500/30 px-4 py-2 flex items-center justify-between;
   }
   
   .terminal-content {
