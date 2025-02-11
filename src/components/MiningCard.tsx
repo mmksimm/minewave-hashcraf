@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -65,13 +66,13 @@ export const MiningCard = () => {
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Available Balance:</span>
-                <span className="text-lg status-green">125.45 COINS</span>
+                <span className="text-lg status-green">0.00 COINS</span>
               </div>
             </div>
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Pending Rewards:</span>
-                <span className="text-lg status-yellow">12.33 COINS</span>
+                <span className="text-lg status-yellow">0.00 COINS</span>
               </div>
             </div>
           </div>
@@ -88,8 +89,8 @@ export const MiningCard = () => {
             {[1, 2, 3].map((rank) => (
               <div key={rank} className="ascii-box">
                 <div className="flex justify-between items-center">
-                  <span>#{rank} Miner_{rank}232</span>
-                  <span className={`text-lg ${rank === 1 ? 'status-yellow' : ''}`}>{1234 - (rank * 100)} H/s</span>
+                  <span>#{rank} Miner_{rank}</span>
+                  <span className={`text-lg ${rank === 1 ? 'status-yellow' : ''}`}>0 H/s</span>
                 </div>
               </div>
             ))}
@@ -100,20 +101,20 @@ export const MiningCard = () => {
           <div className="space-y-4">
             <pre className="text-xs opacity-70">
               {`
-╔══════════════════════════════��═════════════╗
+╔════════════════════════════════════════════╗
 ║              DAILY TASKS                   ║
 ╚════════════════════════════════════════════╝`}
             </pre>
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Mine for 1 hour</span>
-                <span className="text-sm status-orange">45/60 min</span>
+                <span className="text-sm status-orange">0/60 min</span>
               </div>
             </div>
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Find 10 shares</span>
-                <span className="text-sm status-green">{shares}/10</span>
+                <span className="text-sm status-green">0/10</span>
               </div>
             </div>
           </div>
@@ -150,7 +151,7 @@ export const MiningCard = () => {
               <div className="ascii-box">
                 <div className="flex flex-col items-center">
                   <Signal className="w-4 h-4 mb-2 opacity-70" />
-                  <span className="text-lg status-orange">172.50</span>
+                  <span className="text-lg status-orange">0.00</span>
                   <span className="text-xs opacity-70">DIFFICULTY</span>
                 </div>
               </div>
@@ -158,7 +159,7 @@ export const MiningCard = () => {
               <div className="ascii-box">
                 <div className="flex flex-col items-center">
                   <Users className="w-4 h-4 mb-2 opacity-70" />
-                  <span className="text-lg">9,146</span>
+                  <span className="text-lg">0</span>
                   <span className="text-xs opacity-70">MINERS</span>
                 </div>
               </div>
@@ -171,7 +172,7 @@ export const MiningCard = () => {
               </div>
               <Progress value={progress} className="h-2 bg-gray-950 [&>div]:bg-gray-500" />
               <div className="flex justify-between text-xs opacity-70">
-                <span>RATE: 0.1 kW/s</span>
+                <span>RATE: 0.0 kW/s</span>
                 <span>ETA: {formatTime(timeRemaining)}</span>
               </div>
               {isRunning && (
@@ -187,7 +188,7 @@ export const MiningCard = () => {
                   <Database className="w-4 h-4 opacity-70" />
                   <span className="text-sm opacity-70">REWARD POOL</span>
                 </div>
-                <span className="text-lg status-yellow">240.00</span>
+                <span className="text-lg status-yellow">0.00</span>
               </div>
             </div>
 
@@ -215,14 +216,14 @@ export const MiningCard = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black p-4 font-mono text-gray-300">
-      <Card className="w-full max-w-2xl terminal-card space-y-6">
+    <div className="fixed inset-0 flex items-center justify-center bg-black p-4 font-mono text-gray-300">
+      <Card className="w-full h-full max-w-2xl overflow-y-auto terminal-card space-y-6">
         <div className="terminal-header">
           <div className="flex items-center space-x-2">
             <span className="animate-blink">█</span>
             <span className="uppercase tracking-wider">HASHPOWER TERMINAL v1.0</span>
           </div>
-          <span className="text-sm opacity-70">BLOCK #359619</span>
+          <span className="text-sm opacity-70">BLOCK #0</span>
         </div>
 
         <div className="terminal-header space-x-4">
