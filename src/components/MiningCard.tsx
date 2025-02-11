@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -6,6 +5,7 @@ import { Play, Pause, Hash, Clock, Share2, Signal, Users, Database, Wallet, Trop
 import { useMining } from "@/hooks/useMining";
 import { useState, useEffect } from "react";
 import { useTelegramApp } from "@/hooks/useTelegramApp";
+import { useMinerData } from "@/hooks/useMinerData";
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -21,7 +21,8 @@ const formatHashRate = (hashRate: number) => {
 
 export const MiningCard = () => {
   const { isRunning, hashRate, shares, timeRemaining, progress, startMining, stopMining } = useMining();
-  const { showMainButton, hideMainButton, setMainButtonProgress, sendData, themeParams } = useTelegramApp();
+  const { showMainButton, hideMainButton, setMainButtonProgress, sendData, webApp } = useTelegramApp();
+  const { miner, isLoading, updateMinerStats } = useMinerData();
   const [animate, setAnimate] = useState(false);
   const [activeSection, setActiveSection] = useState<'mining' | 'wallet' | 'top' | 'tasks'>('mining');
 
@@ -49,8 +50,14 @@ export const MiningCard = () => {
         hashRate,
         timeRemaining
       });
+
+      updateMinerStats({
+        total_shares: (miner?.total_shares || 0) + 1,
+        total_hash_rate: hashRate,
+        tokens: (miner?.tokens || 0) + 0.01 // Начисляем токены за каждый share
+      });
     }
-  }, [shares, sendData, hashRate, timeRemaining]);
+  }, [shares, sendData, hashRate, timeRemaining, updateMinerStats, miner]);
 
   const renderSection = () => {
     switch (activeSection) {
@@ -66,13 +73,13 @@ export const MiningCard = () => {
             <div className="ascii-box">
               <div className="flex justify-between items-center">
                 <span>Available Balance:</span>
-                <span className="text-lg status-green">0.00 COINS</span>
+                <span className="text-lg status-green">{miner?.tokens.toFixed(2) || '0.00'} COINS</span>
               </div>
             </div>
             <div className="ascii-box">
               <div className="flex justify-between items-center">
-                <span>Pending Rewards:</span>
-                <span className="text-lg status-yellow">0.00 COINS</span>
+                <span>Total Shares:</span>
+                <span className="text-lg status-yellow">{miner?.total_shares || 0}</span>
               </div>
             </div>
           </div>
@@ -214,6 +221,14 @@ export const MiningCard = () => {
         );
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black">
+        <div className="text-gray-300 animate-pulse">Initializing Miner Data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black p-4 font-mono text-gray-300">
