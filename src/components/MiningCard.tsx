@@ -1,10 +1,10 @@
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Play, Pause, Hash, Clock, Share2, Signal, Users, Database, Wallet, Trophy, ListTodo } from "lucide-react";
 import { useMining } from "@/hooks/useMining";
 import { useState, useEffect } from "react";
+import { useTelegramApp } from "@/hooks/useTelegramApp";
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -20,8 +20,17 @@ const formatHashRate = (hashRate: number) => {
 
 export const MiningCard = () => {
   const { isRunning, hashRate, shares, timeRemaining, progress, startMining, stopMining } = useMining();
+  const { showMainButton, hideMainButton } = useTelegramApp();
   const [animate, setAnimate] = useState(false);
   const [activeSection, setActiveSection] = useState<'mining' | 'wallet' | 'top' | 'tasks'>('mining');
+
+  useEffect(() => {
+    if (isRunning) {
+      showMainButton("STOP MINING", stopMining);
+    } else {
+      showMainButton("START MINING", startMining);
+    }
+  }, [isRunning, showMainButton, startMining, stopMining]);
 
   useEffect(() => {
     setAnimate(true);
