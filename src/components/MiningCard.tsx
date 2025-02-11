@@ -20,23 +20,36 @@ const formatHashRate = (hashRate: number) => {
 
 export const MiningCard = () => {
   const { isRunning, hashRate, shares, timeRemaining, progress, startMining, stopMining } = useMining();
-  const { showMainButton, hideMainButton } = useTelegramApp();
+  const { showMainButton, hideMainButton, setMainButtonProgress, sendData, themeParams } = useTelegramApp();
   const [animate, setAnimate] = useState(false);
   const [activeSection, setActiveSection] = useState<'mining' | 'wallet' | 'top' | 'tasks'>('mining');
 
   useEffect(() => {
     if (isRunning) {
       showMainButton("STOP MINING", stopMining);
+      setMainButtonProgress(true);
     } else {
       showMainButton("START MINING", startMining);
+      setMainButtonProgress(false);
     }
-  }, [isRunning, showMainButton, startMining, stopMining]);
+  }, [isRunning, showMainButton, startMining, stopMining, setMainButtonProgress]);
 
   useEffect(() => {
     setAnimate(true);
     const timer = setTimeout(() => setAnimate(false), 500);
     return () => clearTimeout(timer);
   }, [shares]);
+
+  useEffect(() => {
+    if (shares > 0) {
+      sendData({
+        type: 'mining_update',
+        shares,
+        hashRate,
+        timeRemaining
+      });
+    }
+  }, [shares, sendData, hashRate, timeRemaining]);
 
   const renderSection = () => {
     switch (activeSection) {
@@ -87,7 +100,7 @@ export const MiningCard = () => {
           <div className="space-y-4">
             <pre className="text-xs opacity-70">
               {`
-╔════════════════════════════════════════════╗
+╔══════════════════════════════��═════════════╗
 ║              DAILY TASKS                   ║
 ╚════════════════════════════════════════════╝`}
             </pre>
