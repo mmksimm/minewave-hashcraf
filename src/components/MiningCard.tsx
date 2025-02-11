@@ -226,34 +226,38 @@ export const MiningCard = () => {
           <span className="text-sm opacity-70">BLOCK #0</span>
         </div>
 
-        <div className="terminal-header space-x-4">
+        <div className="terminal-header flex flex-wrap gap-2">
           <Button 
             variant="ghost" 
             onClick={() => setActiveSection('mining')}
-            className={`${activeSection === 'mining' ? 'text-white' : 'text-gray-500'}`}
+            className={`${activeSection === 'mining' ? 'text-white' : 'text-gray-500'} px-2 sm:px-4`}
           >
-            <Hash className="w-4 h-4 mr-2" /> MINING
+            <Hash className="w-4 h-4 mr-1 sm:mr-2" /> 
+            <span className="text-xs sm:text-sm">MINING</span>
           </Button>
           <Button 
             variant="ghost" 
             onClick={() => setActiveSection('wallet')}
-            className={`${activeSection === 'wallet' ? 'text-white' : 'text-gray-500'}`}
+            className={`${activeSection === 'wallet' ? 'text-white' : 'text-gray-500'} px-2 sm:px-4`}
           >
-            <Wallet className="w-4 h-4 mr-2" /> WALLET
+            <Wallet className="w-4 h-4 mr-1 sm:mr-2" /> 
+            <span className="text-xs sm:text-sm">WALLET</span>
           </Button>
           <Button 
             variant="ghost" 
             onClick={() => setActiveSection('top')}
-            className={`${activeSection === 'top' ? 'text-white' : 'text-gray-500'}`}
+            className={`${activeSection === 'top' ? 'text-white' : 'text-gray-500'} px-2 sm:px-4`}
           >
-            <Trophy className="w-4 h-4 mr-2" /> TOP
+            <Trophy className="w-4 h-4 mr-1 sm:mr-2" /> 
+            <span className="text-xs sm:text-sm">TOP</span>
           </Button>
           <Button 
             variant="ghost" 
             onClick={() => setActiveSection('tasks')}
-            className={`${activeSection === 'tasks' ? 'text-white' : 'text-gray-500'}`}
+            className={`${activeSection === 'tasks' ? 'text-white' : 'text-gray-500'} px-2 sm:px-4`}
           >
-            <ListTodo className="w-4 h-4 mr-2" /> TASKS
+            <ListTodo className="w-4 h-4 mr-1 sm:mr-2" /> 
+            <span className="text-xs sm:text-sm">TASKS</span>
           </Button>
         </div>
 
