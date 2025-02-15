@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useMinerData } from './useMinerData';
 import { useTelegramApp } from './useTelegramApp';
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 interface MiningState {
   isRunning: boolean;
@@ -28,7 +29,10 @@ export const useMining = () => {
   const { hapticFeedback } = useTelegramApp();
 
   const startMiningSession = async () => {
-    if (!miner?.id) return null;
+    if (!miner?.id) {
+      toast.error('Miner not initialized');
+      return null;
+    }
     
     try {
       const { data, error } = await supabase
@@ -42,10 +46,17 @@ export const useMining = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating mining session:', error);
+        toast.error('Failed to start mining session');
+        return null;
+      }
+
+      console.log('Mining session created:', data);
       return data.id;
     } catch (error) {
       console.error('Error starting mining session:', error);
+      toast.error('Failed to start mining session');
       return null;
     }
   };
@@ -54,20 +65,25 @@ export const useMining = () => {
     if (!currentSessionId || !miner?.id) return;
 
     try {
-      await supabase
+      const { error: sessionError } = await supabase
         .from('mining_sessions')
         .update({
           end_time: new Date().toISOString(),
           shares_found: state.shares,
           avg_hash_rate: state.hashRate,
-          tokens_earned: state.shares * 0.01 // 0.01 токена за каждый шар
+          tokens_earned: state.shares * 0.01
         })
-        .eq('id', currentSessionId)
-        .eq('miner_id', miner.id);
+        .eq('id', currentSessionId);
+
+      if (sessionError) {
+        console.error('Error updating mining session:', sessionError);
+        toast.error('Failed to save mining session');
+        return;
+      }
 
       // Обновляем ежедневное задание
       const miningTimeMinutes = Math.floor((600 - state.timeRemaining) / 60);
-      await supabase
+      const { error: taskError } = await supabase
         .from('daily_tasks')
         .upsert([
           {
@@ -75,12 +91,19 @@ export const useMining = () => {
             date: new Date().toISOString().split('T')[0],
             mining_time_minutes: miningTimeMinutes,
             shares_found: state.shares,
-            tokens_rewarded: state.shares * 0.01
+            tokens_rewarded: state.shares * 0.01,
+            completed: miningTimeMinutes >= 60 || state.shares >= 10
           }
         ]);
 
+      if (taskError) {
+        console.error('Error updating daily task:', taskError);
+        toast.error('Failed to update daily task');
+      }
+
     } catch (error) {
       console.error('Error ending mining session:', error);
+      toast.error('Failed to end mining session');
     }
   };
 
@@ -111,11 +134,16 @@ export const useMining = () => {
         case 'share_found':
           setState(prev => ({ ...prev, shares: prev.shares + 1 }));
           hapticFeedback.success();
-          await updateMinerStats({
-            total_shares: (miner.total_shares || 0) + 1,
-            total_hash_rate: state.hashRate,
-            tokens: (miner.tokens || 0) + 0.01
-          });
+          try {
+            await updateMinerStats({
+              total_shares: (miner.total_shares || 0) + 1,
+              total_hash_rate: state.hashRate,
+              tokens: (miner.tokens || 0) + 0.01
+            });
+          } catch (error) {
+            console.error('Error updating miner stats:', error);
+            toast.error('Failed to update miner stats');
+          }
           break;
       }
     };
@@ -163,6 +191,7 @@ export const useMining = () => {
     if (state.timeRemaining === 0 && state.isRunning) {
       stopMining();
       hapticFeedback.warning();
+      toast.info('Mining session completed');
     }
   }, [state.timeRemaining, state.isRunning, stopMining, hapticFeedback]);
 
