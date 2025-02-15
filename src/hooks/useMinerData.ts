@@ -7,7 +7,7 @@ import { useTelegramApp } from './useTelegramApp';
 export const useMinerData = () => {
   const [miner, setMiner] = useState<Miner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { webApp } = useTelegramApp();
+  const { webApp, hapticFeedback } = useTelegramApp();
 
   const initializeMiner = async () => {
     if (!webApp?.initDataUnsafe?.user?.id) {
@@ -16,6 +16,7 @@ export const useMinerData = () => {
     }
 
     const telegramId = webApp.initDataUnsafe.user.id.toString();
+    const user = webApp.initDataUnsafe.user;
 
     try {
       // Проверяем существует ли майнер
@@ -32,6 +33,9 @@ export const useMinerData = () => {
           .insert([
             {
               telegram_id: telegramId,
+              username: user.username,
+              first_name: user.first_name,
+              last_name: user.last_name,
               tokens: 0,
               total_shares: 0,
               total_hash_rate: 0,
@@ -43,11 +47,13 @@ export const useMinerData = () => {
 
         if (error) throw error;
         existingMiner = newMiner;
+        hapticFeedback.success();
       }
 
       setMiner(existingMiner);
     } catch (error) {
       console.error('Error initializing miner:', error);
+      hapticFeedback.error();
     } finally {
       setIsLoading(false);
     }
@@ -71,6 +77,7 @@ export const useMinerData = () => {
       setMiner(data);
     } catch (error) {
       console.error('Error updating miner stats:', error);
+      hapticFeedback.error();
     }
   };
 

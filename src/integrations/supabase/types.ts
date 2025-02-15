@@ -9,10 +9,150 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      daily_tasks: {
+        Row: {
+          completed: boolean | null
+          date: string | null
+          id: number
+          miner_id: number | null
+          mining_time_minutes: number | null
+          shares_found: number | null
+          tokens_rewarded: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          date?: string | null
+          id?: number
+          miner_id?: number | null
+          mining_time_minutes?: number | null
+          shares_found?: number | null
+          tokens_rewarded?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          date?: string | null
+          id?: number
+          miner_id?: number | null
+          mining_time_minutes?: number | null
+          shares_found?: number | null
+          tokens_rewarded?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_tasks_miner_id_fkey"
+            columns: ["miner_id"]
+            isOneToOne: false
+            referencedRelation: "miners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_tasks_miner_id_fkey"
+            columns: ["miner_id"]
+            isOneToOne: false
+            referencedRelation: "top_miners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      miners: {
+        Row: {
+          created_at: string | null
+          first_name: string | null
+          id: number
+          last_name: string | null
+          last_seen: string | null
+          telegram_id: string
+          tokens: number | null
+          total_hash_rate: number | null
+          total_shares: number | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          last_seen?: string | null
+          telegram_id: string
+          tokens?: number | null
+          total_hash_rate?: number | null
+          total_shares?: number | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          first_name?: string | null
+          id?: number
+          last_name?: string | null
+          last_seen?: string | null
+          telegram_id?: string
+          tokens?: number | null
+          total_hash_rate?: number | null
+          total_shares?: number | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      mining_sessions: {
+        Row: {
+          avg_hash_rate: number | null
+          end_time: string | null
+          id: number
+          miner_id: number | null
+          shares_found: number | null
+          start_time: string | null
+          tokens_earned: number | null
+        }
+        Insert: {
+          avg_hash_rate?: number | null
+          end_time?: string | null
+          id?: number
+          miner_id?: number | null
+          shares_found?: number | null
+          start_time?: string | null
+          tokens_earned?: number | null
+        }
+        Update: {
+          avg_hash_rate?: number | null
+          end_time?: string | null
+          id?: number
+          miner_id?: number | null
+          shares_found?: number | null
+          start_time?: string | null
+          tokens_earned?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mining_sessions_miner_id_fkey"
+            columns: ["miner_id"]
+            isOneToOne: false
+            referencedRelation: "miners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mining_sessions_miner_id_fkey"
+            columns: ["miner_id"]
+            isOneToOne: false
+            referencedRelation: "top_miners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      top_miners: {
+        Row: {
+          first_name: string | null
+          id: number | null
+          last_name: string | null
+          rank: number | null
+          tokens: number | null
+          total_hash_rate: number | null
+          total_shares: number | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

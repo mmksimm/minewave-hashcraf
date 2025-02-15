@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import CryptoJS from 'crypto-js';
+import { useMinerData } from './useMinerData';
+import { useTelegramApp } from './useTelegramApp';
 
 interface MiningState {
   isRunning: boolean;
@@ -22,6 +23,8 @@ export const useMining = () => {
   });
 
   const [worker, setWorker] = useState<Worker | null>(null);
+  const { updateMinerStats } = useMinerData();
+  const { hapticFeedback } = useTelegramApp();
 
   const startMining = useCallback(() => {
     if (worker) return;
@@ -30,6 +33,8 @@ export const useMining = () => {
       new URL('../workers/miningWorker.ts', import.meta.url),
       { type: 'module' }
     );
+
+    hapticFeedback.impact('medium');
 
     newWorker.onmessage = (event) => {
       const { type, data } = event.data;
@@ -40,6 +45,7 @@ export const useMining = () => {
           break;
         case 'share_found':
           setState(prev => ({ ...prev, shares: prev.shares + 1 }));
+          hapticFeedback.success();
           break;
         case 'progress':
           setState(prev => ({ ...prev, progress: data }));
@@ -49,15 +55,16 @@ export const useMining = () => {
 
     setWorker(newWorker);
     setState(prev => ({ ...prev, isRunning: true }));
-  }, []);
+  }, [worker, hapticFeedback]);
 
   const stopMining = useCallback(() => {
     if (worker) {
       worker.terminate();
       setWorker(null);
       setState(prev => ({ ...prev, isRunning: false }));
+      hapticFeedback.impact('rigid');
     }
-  }, [worker]);
+  }, [worker, hapticFeedback]);
 
   useEffect(() => {
     let timer: number;
@@ -76,6 +83,13 @@ export const useMining = () => {
       if (timer) clearInterval(timer);
     };
   }, [state.isRunning, state.timeRemaining]);
+
+  useEffect(() => {
+    if (state.timeRemaining === 0 && state.isRunning) {
+      stopMining();
+      hapticFeedback.warning();
+    }
+  }, [state.timeRemaining, state.isRunning, stopMining, hapticFeedback]);
 
   return {
     ...state,
