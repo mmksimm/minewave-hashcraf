@@ -11,6 +11,17 @@ interface TelegramWebApp {
       language_code?: string;
     };
   };
+  MainButton: {
+    text: string;
+    onClick: (callback: () => void) => void;
+    show: () => void;
+    hide: () => void;
+    showProgress: () => void;
+    hideProgress: () => void;
+  };
+  close: () => void;
+  sendData: (data: string) => void;
+  themeParams: Record<string, any>;
 }
 
 declare global {
