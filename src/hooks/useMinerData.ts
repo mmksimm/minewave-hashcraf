@@ -51,6 +51,30 @@ export const useMinerData = () => {
       }
 
       setMiner(existingMiner);
+
+      // Подписываемся на обновления майнера
+      const channel = supabase
+        .channel('miner_updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'miners',
+            filter: `telegram_id=eq.${telegramId}`
+          },
+          (payload) => {
+            console.log('Miner updated:', payload);
+            if (payload.new) {
+              setMiner(payload.new as Miner);
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     } catch (error) {
       console.error('Error initializing miner:', error);
       hapticFeedback.error();
@@ -82,7 +106,10 @@ export const useMinerData = () => {
   };
 
   useEffect(() => {
-    initializeMiner();
+    const cleanup = initializeMiner();
+    return () => {
+      cleanup?.then(cleanupFn => cleanupFn?.());
+    };
   }, [webApp?.initDataUnsafe?.user?.id]);
 
   return {

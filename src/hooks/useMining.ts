@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useMinerData } from './useMinerData';
 import { useTelegramApp } from './useTelegramApp';
+import { supabase } from '@/lib/supabase';
 
 interface MiningState {
   isRunning: boolean;
@@ -21,13 +22,77 @@ export const useMining = () => {
     difficulty: '0000',
     progress: 0,
   });
-
+  const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
   const [worker, setWorker] = useState<Worker | null>(null);
-  const { updateMinerStats } = useMinerData();
+  const { miner, updateMinerStats } = useMinerData();
   const { hapticFeedback } = useTelegramApp();
 
-  const startMining = useCallback(() => {
-    if (worker) return;
+  const startMiningSession = async () => {
+    if (!miner?.id) return null;
+    
+    try {
+      const { data, error } = await supabase
+        .from('mining_sessions')
+        .insert([{
+          miner_id: miner.id,
+          shares_found: 0,
+          avg_hash_rate: 0,
+          tokens_earned: 0
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data.id;
+    } catch (error) {
+      console.error('Error starting mining session:', error);
+      return null;
+    }
+  };
+
+  const endMiningSession = async () => {
+    if (!currentSessionId || !miner?.id) return;
+
+    try {
+      await supabase
+        .from('mining_sessions')
+        .update({
+          end_time: new Date().toISOString(),
+          shares_found: state.shares,
+          avg_hash_rate: state.hashRate,
+          tokens_earned: state.shares * 0.01 // 0.01 токена за каждый шар
+        })
+        .eq('id', currentSessionId)
+        .eq('miner_id', miner.id);
+
+      // Обновляем ежедневное задание
+      const miningTimeMinutes = Math.floor((600 - state.timeRemaining) / 60);
+      await supabase
+        .from('daily_tasks')
+        .upsert([
+          {
+            miner_id: miner.id,
+            date: new Date().toISOString().split('T')[0],
+            mining_time_minutes: miningTimeMinutes,
+            shares_found: state.shares,
+            tokens_rewarded: state.shares * 0.01
+          }
+        ]);
+
+    } catch (error) {
+      console.error('Error ending mining session:', error);
+    }
+  };
+
+  const startMining = useCallback(async () => {
+    if (worker || !miner?.id) return;
+
+    const sessionId = await startMiningSession();
+    if (!sessionId) {
+      hapticFeedback.error();
+      return;
+    }
+    setCurrentSessionId(sessionId);
 
     const newWorker = new Worker(
       new URL('../workers/miningWorker.ts', import.meta.url),
@@ -36,7 +101,7 @@ export const useMining = () => {
 
     hapticFeedback.impact('medium');
 
-    newWorker.onmessage = (event) => {
+    newWorker.onmessage = async (event) => {
       const { type, data } = event.data;
       
       switch (type) {
@@ -46,23 +111,33 @@ export const useMining = () => {
         case 'share_found':
           setState(prev => ({ ...prev, shares: prev.shares + 1 }));
           hapticFeedback.success();
-          break;
-        case 'progress':
-          setState(prev => ({ ...prev, progress: data }));
+          await updateMinerStats({
+            total_shares: (miner.total_shares || 0) + 1,
+            total_hash_rate: state.hashRate,
+            tokens: (miner.tokens || 0) + 0.01
+          });
           break;
       }
     };
 
+    newWorker.postMessage({ 
+      type: 'start',
+      difficulty: state.difficulty
+    });
+
     setWorker(newWorker);
     setState(prev => ({ ...prev, isRunning: true }));
-  }, [worker, hapticFeedback]);
+  }, [worker, miner?.id, state.difficulty, state.hashRate, hapticFeedback, updateMinerStats]);
 
-  const stopMining = useCallback(() => {
+  const stopMining = useCallback(async () => {
     if (worker) {
+      worker.postMessage({ type: 'stop' });
       worker.terminate();
       setWorker(null);
       setState(prev => ({ ...prev, isRunning: false }));
       hapticFeedback.impact('rigid');
+      await endMiningSession();
+      setCurrentSessionId(null);
     }
   }, [worker, hapticFeedback]);
 
@@ -90,6 +165,15 @@ export const useMining = () => {
       hapticFeedback.warning();
     }
   }, [state.timeRemaining, state.isRunning, stopMining, hapticFeedback]);
+
+  // Очистка при размонтировании
+  useEffect(() => {
+    return () => {
+      if (worker) {
+        worker.terminate();
+      }
+    };
+  }, [worker]);
 
   return {
     ...state,

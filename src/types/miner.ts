@@ -18,7 +18,7 @@ export interface MinerStats {
   total_hash_rate: number;
 }
 
-export interface TopMiner extends Miner {
+export interface TopMiner extends Omit<Miner, 'telegram_id' | 'last_seen' | 'created_at'> {
   rank: number;
 }
 
