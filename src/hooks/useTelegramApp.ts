@@ -1,48 +1,22 @@
 
 import { useEffect, useState } from 'react';
 
+interface TelegramWebApp {
+  initDataUnsafe: {
+    user?: {
+      id: number;
+      first_name: string;
+      last_name?: string;
+      username?: string;
+      language_code?: string;
+    };
+  };
+}
+
 declare global {
   interface Window {
-    Telegram: {
-      WebApp: {
-        ready: () => void;
-        close: () => void;
-        expand: () => void;
-        isExpanded: boolean;
-        MainButton: {
-          show: () => void;
-          hide: () => void;
-          setText: (text: string) => void;
-          onClick: (callback: () => void) => void;
-          offClick: (callback: () => void) => void;
-          showProgress: (leaveActive?: boolean) => void;
-          hideProgress: () => void;
-          isActive: boolean;
-          isVisible: boolean;
-          color: string;
-          textColor: string;
-        };
-        BackButton: {
-          show: () => void;
-          hide: () => void;
-          onClick: (callback: () => void) => void;
-          offClick: (callback: () => void) => void;
-          isVisible: boolean;
-        };
-        themeParams: {
-          bg_color: string;
-          text_color: string;
-          hint_color: string;
-          button_color: string;
-          button_text_color: string;
-          secondary_bg_color: string;
-        };
-        headerColor: string;
-        backgroundColor: string;
-        sendData: (data: any) => void;
-        enableClosingConfirmation: () => void;
-        disableClosingConfirmation: () => void;
-      };
+    Telegram?: {
+      WebApp: TelegramWebApp;
     };
   }
 }
@@ -52,54 +26,29 @@ export const useTelegramApp = () => {
   const webApp = window.Telegram?.WebApp;
 
   useEffect(() => {
-    if (!webApp) {
-      console.error('Telegram WebApp is not available');
-      return;
-    }
-
-    try {
-      // Initialize the WebApp
-      webApp.ready();
+    if (webApp) {
       setIsReady(true);
-
-      // Expand app to full height
-      if (!webApp.isExpanded) {
-        webApp.expand();
-      }
-
-      // Enable closing confirmation
-      webApp.enableClosingConfirmation();
-
-      // Apply theme colors
-      document.body.style.backgroundColor = webApp.backgroundColor;
-
-      return () => {
-        webApp.disableClosingConfirmation();
-      };
-    } catch (error) {
-      console.error('Error initializing Telegram WebApp:', error);
     }
   }, [webApp]);
 
   const showMainButton = (text: string, callback: () => void) => {
-    if (webApp?.MainButton) {
-      webApp.MainButton.setText(text.toUpperCase());
+    if (webApp) {
+      webApp.MainButton.text = text;
       webApp.MainButton.onClick(callback);
       webApp.MainButton.show();
     }
   };
 
   const hideMainButton = () => {
-    if (webApp?.MainButton) {
+    if (webApp) {
       webApp.MainButton.hide();
-      webApp.MainButton.offClick(() => {});
     }
   };
 
   const setMainButtonProgress = (inProgress: boolean) => {
-    if (webApp?.MainButton) {
+    if (webApp) {
       if (inProgress) {
-        webApp.MainButton.showProgress(true);
+        webApp.MainButton.showProgress();
       } else {
         webApp.MainButton.hideProgress();
       }
@@ -107,20 +56,25 @@ export const useTelegramApp = () => {
   };
 
   const closeApp = () => {
-    webApp?.close();
+    if (webApp) {
+      webApp.close();
+    }
   };
 
   const sendData = (data: any) => {
-    webApp?.sendData(JSON.stringify(data));
+    if (webApp) {
+      webApp.sendData(JSON.stringify(data));
+    }
   };
 
   return {
     isReady,
+    webApp,
     showMainButton,
     hideMainButton,
     setMainButtonProgress,
     closeApp,
     sendData,
-    themeParams: webApp?.themeParams,
+    themeParams: webApp?.themeParams || {}
   };
 };
